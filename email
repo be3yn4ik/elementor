@@ -1,0 +1,24 @@
+private function replace_content_shortcodes( $email_content, $record, $line_break ) {
+    $email_content = do_shortcode( $email_content );
+    $all_fields_shortcode = '[all-fields]';
+
+    if ( false !== strpos( $email_content, $all_fields_shortcode ) ) {
+        $text = '';
+        foreach ( $record->get( 'fields' ) as $field ) {
+            // Пропустить пустые поля
+            if ( empty( $field['value'] ) ) {
+                continue;
+            }
+            $formatted = $this->field_formatted( $field );
+            if ( ( 'textarea' === $field['type'] ) && ( '<br>' === $line_break ) ) {
+                $formatted = str_replace( [ "\r\n", "\n", "\r" ], '<br />', $formatted );
+            }
+            $text .= $formatted . $line_break;
+        }
+
+        $email_content = str_replace( $all_fields_shortcode, $text, $email_content );
+
+    }
+
+    return $email_content;
+}
